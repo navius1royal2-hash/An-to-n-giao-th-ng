@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc Nghiệm An Toàn Giao Thông</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            background-image: 
+                linear-gradient(90deg, transparent 49%, rgba(255, 255, 255, 0.1) 49%, rgba(255, 255, 255, 0.1) 51%, transparent 51%),
+                linear-gradient(0deg, #0f172a 0%, #1e293b 100%);
+            background-size: 60px 100px, 100% 100%;
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+
+        .road-dash {
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 200%;
+            background-image: linear-gradient(to bottom, #fbbf24 50%, transparent 50%);
+            background-size: 8px 80px;
+            animation: moveRoad 10s linear infinite;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes moveRoad {
+            0% { transform: translate(-50%, -50%); }
+            100% { transform: translate(-50%, 0%); }
+        }
+
+        h1, h2, .oswald { font-family: 'Oswald', sans-serif; }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+
+        .header-badge {
+            background: linear-gradient(90deg, #ef4444, #eab308, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .btn-modern {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-modern::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.4s ease;
+        }
+
+        .btn-modern:hover::after {
+            left: 100%;
+        }
+
+        .btn-modern:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        
+        .option-btn {
+            background: rgba(51, 65, 85, 0.7);
+            border: 2px solid #475569;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: rgba(71, 85, 105, 0.9);
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            transform: translateX(4px);
+        }
+        
+        .correct { 
+            background: rgba(16, 185, 129, 0.2) !important; 
+            border-color: #10b981 !important; 
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4) !important;
+        }
+        .correct .opt-letter { background: #10b981; color: #fff; }
+
+        .wrong { 
+            background: rgba(239, 68, 68, 0.2) !important; 
+            border-color: #ef4444 !important; 
+        }
+        .wrong .opt-letter { background: #ef4444; color: #fff; }
+        
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .team-card {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .team-active {
+            background: linear-gradient(145deg, rgba(56, 189, 248, 0.15), rgba(14, 165, 233, 0.05));
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            transform: translateY(-4px);
+        }
+        .team-active::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, #38bdf8, transparent, #38bdf8);
+            z-index: -1;
+            border-radius: inherit;
+            animation: borderGlow 2s linear infinite;
+        }
+        @keyframes borderGlow {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        /* Lucky Star styles */
+        .lucky-star {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+            animation: starPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes starPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(251, 191, 36, 0.9); }
+        }
+        .star-spin {
+            animation: spin 3s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-2 md:p-4 flex items-center justify-center relative overflow-hidden">
+
+    <div class="road-dash"></div>
+
+    <div id="game-container" class="max-w-4xl w-full glass-panel rounded-3xl overflow-hidden relative p-5 md:p-8 z-10 transition-transform duration-300">
+        
+        <header class="text-center mb-6 relative z-10">
+            <div class="inline-block px-4 py-1 rounded-full bg-slate-800/80 border border-slate-700 mb-3">
+                <span class="header-badge tracking-widest uppercase text-[10px] md:text-xs">🚦 KỸ NĂNG VÀ KIẾN THỨC NÂNG CAO</span>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-bold text-white oswald drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] tracking-wide">
+                AN TOÀN GIAO THÔNG
+            </h1>
+        </header>
+
+        <div id="team-board" class="grid grid-cols-3 gap-3 md:gap-5 mb-8 relative z-10">
+            <!-- Render bằng JS -->
+        </div>
+
+        <div id="start-screen" class="text-center fade-in py-8 relative z-10">
+            <div class="bg-slate-800/50 p-6 md:p-8 rounded-2xl border border-slate-700 mb-8 max-w-2xl mx-auto shadow-inner">
+                <div class="flex justify-center gap-4 mb-4">
+                    <div class="w-4 h-4 rounded-full bg-red-500 shadow-[0_0_10px_#ef4444]"></div>
+                    <div class="w-4 h-4 rounded-full bg-yellow-400 shadow-[0_0_10px_#facc15]"></div>
+                    <div class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div>
+                </div>
+                <p class="text-slate-300 text-base md:text-lg font-medium leading-relaxed">
+                    Sẵn sàng thử thách kiến thức với 11 tình huống giao thông thực tế ở mức độ nâng cao. Hãy đại diện cho nhóm của mình đưa ra quyết định an toàn và chính xác nhất!
+                </p>
+                <p class="text-amber-400 text-sm mt-3 font-medium">⭐ Mỗi nhóm có 2 lượt "Ngôi Sao May Mắn" – Đúng +20, Sai -10 điểm!</p>
+            </div>
+            <button onclick="startGame()" class="btn-modern bg-sky-600 hover:bg-sky-500 text-white oswald text-xl md:text-2xl font-bold py-4 px-12 rounded-xl shadow-[0_0_20px_rgba(14,165,233,0.4)] tracking-wide uppercase">
+                BẮT ĐẦU NGAY 🚀
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden fade-in relative z-10">
+            <div class="flex justify-between items-end mb-3">
+                <span class="text-sky-400 font-bold oswald text-xl md:text-2xl tracking-wide uppercase">
+                    CÂU <span id="question-number" class="text-white text-3xl">1</span> <span class="text-slate-500 text-lg">/ 11</span>
+                </span>
+                <span class="text-emerald-400 font-bold text-sm bg-emerald-900/30 px-3 py-1 rounded-lg border border-emerald-800">
+                    +10 Điểm/Câu
+                </span>
+            </div>
+            
+            <div class="w-full bg-slate-800 rounded-full h-2 mb-6 overflow-hidden border border-slate-700">
+                <div id="progress-bar" class="bg-gradient-to-r from-sky-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+
+            <div class="bg-slate-800/80 p-5 md:p-6 rounded-2xl border-l-4 border-l-sky-500 mb-6 shadow-lg relative">
+                <h2 id="question-text" class="text-lg md:text-xl font-medium text-white leading-relaxed">Nội dung câu hỏi?</h2>
+                <div id="lucky-star-badge" class="hidden absolute -top-3 -right-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                    ⭐ NGÔI SAO MAY MẮN
+                </div>
+            </div>
+            
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <!-- Các đáp án -->
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center fade-in py-10 relative z-10">
+            <div class="inline-block px-4 py-1 rounded-full bg-slate-800 border border-slate-700 mb-2">
+                <span class="text-sky-400 font-bold text-xs tracking-widest uppercase">KẾT THÚC HÀNH TRÌNH</span>
+            </div>
+            <h2 id="winner-announcement" class="text-3xl md:text-5xl font-bold text-white mb-8 oswald tracking-wide drop-shadow-[0_0_15px_rgba(56,189,248,0.5)]">
+                🏆 NHÓM 1 VỀ ĐÍCH!
+            </h2>
+
+            <div id="final-ranks" class="max-w-md mx-auto space-y-4 mb-10">
+                <!-- Bảng xếp hạng -->
+            </div>
+
+            <button onclick="resetGame()" class="btn-modern bg-slate-700 hover:bg-slate-600 text-white oswald text-lg md:text-xl font-bold py-3 px-10 rounded-xl border border-slate-500 uppercase">
+                Chơi lại 🔄
+            </button>
+        </div>
+    </div>
+
+    <!-- Phản hồi đúng/sai -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm hidden flex-col items-center justify-center z-50 transition-opacity">
+        <div id="feedback-icon" class="text-8xl mb-4 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] pop-in">🚦</div>
+        <h2 id="feedback-text" class="text-5xl font-bold oswald drop-shadow-lg pop-in uppercase tracking-widest">ĐÚNG!</h2>
+        <p id="feedback-subtext" class="text-2xl font-medium text-slate-300 mt-2 pop-in">+10 Điểm</p>
+    </div>
+
+    <!-- Lucky Star Overlay -->
+    <div id="lucky-star-overlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md hidden flex-col items-center justify-center z-[60] transition-opacity">
+        <div class="text-center max-w-lg mx-auto px-4">
+            <div class="text-8xl mb-6 star-spin">⭐</div>
+            <h2 class="text-4xl md:text-5xl font-bold oswald text-amber-400 mb-4 drop-shadow-[0_0_30px_rgba(251,191,36,0.8)] uppercase tracking-widest">
+                NGÔI SAO MAY MẮN!
+            </h2>
+            <p class="text-xl md:text-2xl text-white mb-2 font-medium">
+                Nhóm <span id="lucky-team" class="text-amber-400 font-bold">1</span> nhận được lời đề nghị:
+            </p>
+            <p class="text-lg md:text-xl text-slate-300 mb-8 leading-relaxed">
+                <span class="text-emerald-400 font-bold">Đúng +20 điểm</span> (gấp đôi)<br>
+                <span class="text-red-400 font-bold">Sai -10 điểm</span><br>
+                Bạn có đồng ý không?
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="acceptLuckyStar()" class="btn-modern bg-amber-500 hover:bg-amber-400 text-slate-900 oswald text-xl font-bold py-4 px-10 rounded-xl shadow-[0_0_25px_rgba(251,191,36,0.6)] uppercase tracking-wide">
+                    ĐỒNG Ý ⭐
+                </button>
+                <button onclick="declineLuckyStar()" class="btn-modern bg-slate-700 hover:bg-slate-600 text-white oswald text-xl font-bold py-4 px-10 rounded-xl border border-slate-500 uppercase tracking-wide">
+                    TỪ CHỐI
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Tại một giao lộ không có biển báo đi theo vòng xuyến, đồng thời không có đèn tín hiệu. Xe A đến từ bên trái, xe B đến từ bên phải của bạn. Bạn phải nhường đường cho:",
+                options: ["A. Xe A vì xe A đến trước", "B. Xe B vì xe đến từ bên phải", "C. Không cần nhường vì đường không có đèn", "D. Xe nào bấm còi trước được đi trước"],
+                answer: 1
+            },
+            {
+                question: "Tại một giao lộ có biển báo đi theo vòng xuyến, xe của bạn đang chuẩn bị nhập vào vòng xuyến. Một xe đang lưu thông bên trái bạn trong vòng xuyến. Bạn phải:",
+                options: ["A. Đi trước vì mình đang chuẩn bị vào vòng xuyến", "B. Nhường đường cho xe bên trái", "C. Nhường cho xe bên phải", "D. Hai xe cùng đi vì không có đèn đỏ"],
+                answer: 1
+            },
+            {
+                question: "Bạn đang đi xe đạp điện và đến một ngã tư. Đèn giao thông đang màu vàng, bạn còn cách vạch dừng một đoạn và hoàn toàn có thể dừng xe an toàn. Bạn nên:",
+                options: ["A. Tăng tốc vượt qua trước khi đèn chuyển đỏ", "B. Dừng trước vạch dừng", "C. Bấm còi rồi đi tiếp", "D. Chỉ cần giảm tốc độ nhưng vẫn đi qua"],
+                answer: 1
+            },
+            {
+                question: "Bạn đang đi trên đường thì gặp xe cứu thương đang thực hiện nhiệm vụ và có tín hiệu ưu tiên từ phía sau. Bạn nên xử lý thế nào?",
+                options: ["A. Tăng tốc để đi trước xe cứu thương", "B. Giữ nguyên tốc độ vì xe cứu thương phải tự tránh", "C. Chủ động nhường đường theo quy định để xe ưu tiên đi qua", "D. Chỉ nhường khi xe cứu thương bấm còi liên tục"],
+                answer: 2
+            },
+            {
+                question: "Tại nơi đường giao nhau giữa đường chính và đường nhánh, xe đang đi trên đường nhánh muốn nhập vào đường chính. Trong trường hợp không có chỉ dẫn khác, xe trên đường nhánh phải:",
+                options: ["A. Được đi trước nếu chạy nhanh hơn", "B. Nhường đường cho xe trên đường chính", "C. Chỉ nhường xe bên trái", "D. Chỉ nhường xe bên phải"],
+                answer: 1
+            },
+            {
+                question: "Một chiếc xe phía trước bạn đang đi chậm. Bạn định vượt nhưng đoạn đường phía trước là đường cong, tầm nhìn bị hạn chế. Bạn nên:",
+                options: ["A. Vượt ngay nếu bật xi-nhan", "B. Bấm còi rồi vượt", "C. Không vượt tại vị trí đó", "D. Lấn sang làn đối diện rồi vượt thật nhanh"],
+                answer: 2
+            },
+            {
+                question: "Bạn đang rẽ phải tại một giao lộ. Cùng lúc đó, một người đi bộ đang qua đường trên phần đường dành cho người đi bộ. Bạn phải:",
+                options: ["A. Rẽ trước vì phương tiện được ưu tiên hơn người đi bộ", "B. Bấm còi để người đi bộ tránh ra", "C. Giảm tốc độ và nhường đường cho người đi bộ", "D. Chỉ nhường nếu người đi bộ đã đi được một nửa đường"],
+                answer: 2
+            },
+            {
+                question: "Tại nơi giao nhau giữa đường bộ và đường sắt, đèn đỏ đang sáng và chuông cảnh báo đang kêu, nhưng rào chắn chưa đóng hoàn toàn. Người điều khiển phương tiện phải:",
+                options: ["A. Đi qua nhanh trước khi rào chắn đóng", "B. Dừng lại và chờ tín hiệu cho phép đi", "C. Chỉ cần nhìn hai bên rồi đi", "D. Bấm còi xin đường rồi đi qua"],
+                answer: 1
+            },
+            {
+                question: "Một bạn học sinh nói: “Đường vắng thì có thể vừa đi xe vừa cầm điện thoại vì nguy cơ va chạm rất thấp.” Theo em, nhận định trên:",
+                options: ["A. Đúng, vì đường vắng", "B. Đúng nếu đi với tốc độ thấp", "C. Sai, vì việc sử dụng điện thoại làm giảm khả năng quan sát và xử lý tình huống", "D. Chỉ sai khi có cảnh sát giao thông"],
+                answer: 2
+            },
+            {
+                question: "Bạn đang đi xe trên đường. Phía trước có một xe đang dừng sát bên phải để đón người. Bạn muốn tránh xe đó. Tuy nhiên, đúng lúc ấy có một xe khác đang đi ngược chiều tới và khoảng cách không đủ an toàn. Bạn nên:",
+                options: ["A. Lấn sang phần đường đối diện để vượt nhanh", "B. Bấm còi liên tục và vượt", "C. Giảm tốc độ, giữ vị trí an toàn và chờ đến khi đủ điều kiện mới đi tiếp", "D. Tăng tốc để buộc xe đối diện phải nhường"],
+                answer: 2
+            },
+            {
+                question: "Trong các trường hợp sau, trường hợp nào KHÔNG phải cứ “đường vắng” là được phép thực hiện?",
+                options: ["A. Vượt xe tại đoạn đường cong bị che khuất tầm nhìn", "B. Đi đúng phần đường, làn đường", "C. Giảm tốc độ khi đến nơi giao nhau", "D. Quan sát trước khi qua đường"],
+                answer: 0
+            }
+        ];
+
+        let currentQuestion = 0;
+        let currentTeam = 0;
+        let scores = [0, 0, 0];
+        let canClick = true;
+        const TOTAL_QUESTIONS = quizData.length;
+        const POINTS_PER_Q = 10;
+
+        // Lucky Star state
+        let luckyStarRemaining = [2, 2, 2]; // mỗi nhóm 2 lượt
+        let luckyStarActive = false;       // câu hỏi hiện tại có ngôi sao không
+        let luckyStarAccepted = false;     // nhóm đã chấp nhận chưa
+        let luckyStarResolve = null;       // promise resolve
+
+        function shootConfetti() {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#38bdf8', '#10b981', '#facc15'] });
+        }
+
+        function initTeamBoard() {
+            let html = '';
+            for (let i = 0; i < 3; i++) {
+                let isActive = i === currentTeam;
+                let starsLeft = luckyStarRemaining[i];
+                html += `
+                    <div class="team-card bg-slate-800/80 border-2 rounded-xl p-3 md:p-4 text-center flex flex-col items-center justify-center ${isActive ? 'team-active' : 'border-slate-700'}">
+                        ${isActive ? '<div class="absolute -top-3 bg-sky-500 text-white text-[10px] font-bold uppercase px-3 py-1 rounded-full shadow-lg pop-in">Lượt Nhóm Này</div>' : ''}
+                        <div class="text-xs md:text-sm font-semibold text-slate-400 uppercase tracking-widest mb-1">NHÓM ${i + 1}</div>
+                        <div class="text-2xl md:text-3xl font-bold oswald ${isActive ? 'text-sky-400' : 'text-slate-300'}">${scores[i]} <span class="text-sm text-slate-500">Đ</span></div>
+                        <div class="text-[10px] mt-1 ${starsLeft > 0 ? 'text-amber-400' : 'text-slate-600'}">⭐ ${starsLeft}/2</div>
+                    </div>
+                `;
+            }
+            document.getElementById('team-board').innerHTML = html;
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // Random kích hoạt ngôi sao may mắn
+        function shouldTriggerLuckyStar() {
+            if (luckyStarRemaining[currentTeam] <= 0) return false;
+            // Xác suất 35% mỗi câu
+            return Math.random() < 0.35;
+        }
+
+        function showLuckyStarOverlay() {
+            return new Promise(resolve => {
+                luckyStarResolve = resolve;
+                document.getElementById('lucky-team').innerText = currentTeam + 1;
+                const overlay = document.getElementById('lucky-star-overlay');
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            });
+        }
+
+        function acceptLuckyStar() {
+            luckyStarAccepted = true;
+            luckyStarRemaining[currentTeam]--;
+            initTeamBoard();
+            const overlay = document.getElementById('lucky-star-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            if (luckyStarResolve) luckyStarResolve();
+        }
+
+        function declineLuckyStar() {
+            luckyStarAccepted = false;
+            const overlay = document.getElementById('lucky-star-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            if (luckyStarResolve) luckyStarResolve();
+        }
+
+        async function loadQuestion() {
+            canClick = true;
+            luckyStarActive = false;
+            luckyStarAccepted = false;
+
+            // Kiểm tra ngôi sao may mắn
+            if (shouldTriggerLuckyStar()) {
+                luckyStarActive = true;
+                document.getElementById('lucky-star-badge').classList.remove('hidden');
+                await showLuckyStarOverlay();
+            } else {
+                document.getElementById('lucky-star-badge').classList.add('hidden');
+            }
+
+            initTeamBoard();
+
+            let num = currentQuestion + 1;
+            document.getElementById('question-number').innerText = num;
+            document.getElementById('progress-bar').style.width = `${(num / TOTAL_QUESTIONS) * 100}%`;
+
+            let q = quizData[currentQuestion];
+            document.getElementById('question-text').innerText = q.question;
+
+            let container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            q.options.forEach((opt, idx) => {
+                let btn = document.createElement('button');
+                btn.className = "option-btn w-full text-left p-3 md:p-4 rounded-xl text-sm md:text-base font-medium text-slate-200 flex items-start gap-3 group";
+                
+                let letter = opt.charAt(0);
+                let text = opt.substring(3);
+                
+                btn.innerHTML = `<span class="opt-letter bg-slate-700 text-slate-300 rounded flex-shrink-0 w-7 h-7 flex items-center justify-center font-bold text-sm transition-colors group-hover:bg-sky-500 group-hover:text-white">${letter}</span> <span class="pt-0.5">${text}</span>`;
+                btn.onclick = () => selectAnswer(idx, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function showFeedback(isCorrect, points, isLucky) {
+            let overlay = document.getElementById('feedback-overlay');
+            let icon = document.getElementById('feedback-icon');
+            let text = document.getElementById('feedback-text');
+            let sub = document.getElementById('feedback-subtext');
+
+            if (isCorrect) {
+                icon.innerText = "🟢";
+                text.innerText = "CHÍNH XÁC!";
+                text.className = "text-5xl md:text-6xl font-bold oswald text-emerald-400 drop-shadow-[0_0_20px_rgba(16,185,129,0.5)] pop-in uppercase tracking-widest";
+                sub.innerText = isLucky ? `+${points} Điểm (Ngôi Sao May Mắn!) ⭐` : `+${points} Điểm cho Nhóm ${currentTeam + 1}`;
+                sub.className = "text-xl md:text-2xl font-medium text-emerald-300 mt-2 pop-in";
+                shootConfetti();
+            } else {
+                icon.innerText = "🔴";
+                text.innerText = "SAI RỒI!";
+                text.className = "text-5xl md:text-6xl font-bold oswald text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.5)] pop-in uppercase tracking-widest";
+                if (isLucky) {
+                    sub.innerText = `${points} Điểm (Ngôi Sao May Mắn!) ⭐`;
+                } else {
+                    sub.innerText = `Rất tiếc, không có điểm.`;
+                }
+                sub.className = "text-xl md:text-2xl font-medium text-red-400 mt-2 pop-in";
+            }
+
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            
+            return new Promise(resolve => setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                resolve();
+            }, 1800));
+        }
+
+        async function selectAnswer(selectedIndex, buttonEl) {
+            if (!canClick) return;
+            canClick = false;
+
+            let q = quizData[currentQuestion];
+            let allBtns = document.getElementById('options-container').children;
+            let isCorrect = (selectedIndex === q.answer);
+            let pointsEarned = 0;
+
+            if (isCorrect) {
+                buttonEl.classList.add('correct');
+                if (luckyStarActive && luckyStarAccepted) {
+                    pointsEarned = 20;
+                } else {
+                    pointsEarned = 10;
+                }
+                scores[currentTeam] += pointsEarned;
+            } else {
+                buttonEl.classList.add('wrong');
+                allBtns[q.answer].classList.add('correct');
+                if (luckyStarActive && luckyStarAccepted) {
+                    pointsEarned = -10;
+                    scores[currentTeam] += pointsEarned;
+                }
+            }
+
+            for (let btn of allBtns) {
+                btn.disabled = true;
+                btn.style.cursor = 'default';
+            }
+            
+            initTeamBoard(); 
+            await showFeedback(isCorrect, pointsEarned, luckyStarActive && luckyStarAccepted);
+            nextTurn();
+        }
+
+        function nextTurn() {
+            currentQuestion++;
+            currentTeam = (currentTeam + 1) % 3;
+            
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            let rankedTeams = [0, 1, 2].map(i => ({ team: i + 1, score: scores[i] }));
+            rankedTeams.sort((a, b) => b.score - a.score);
+
+            document.getElementById('winner-announcement').innerText = `🏆 NHÓM ${rankedTeams[0].team} VỀ ĐÍCH ĐẦU TIÊN!`;
+            
+            let duration = 3000;
+            let end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#38bdf8', '#10b981'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#38bdf8', '#10b981'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+
+            let ranksHtml = '';
+            rankedTeams.forEach((item, index) => {
+                let bgStyle = index === 0 ? "bg-sky-900/40 border-sky-500 shadow-[0_0_15px_rgba(56,189,248,0.3)] transform scale-105" : "bg-slate-800 border-slate-700";
+                let icon = index === 0 ? "🥇" : (index === 1 ? "🥈" : "🥉");
+                ranksHtml += `
+                    <div class="flex justify-between items-center p-4 border-2 rounded-xl ${bgStyle}">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${icon}</span>
+                            <span class="font-bold text-white text-lg tracking-wider">NHÓM ${item.team}</span>
+                        </div>
+                        <span class="text-2xl font-bold oswald text-sky-400">${item.score} <span class="text-sm text-slate-400 font-sans">ĐIỂM</span></span>
+                    </div>
+                `;
+            });
+            document.getElementById('final-ranks').innerHTML = ranksHtml;
+        }
+
+        function resetGame() {
+            currentQuestion = 0;
+            currentTeam = 0;
+            scores = [0, 0, 0];
+            luckyStarRemaining = [2, 2, 2];
+            luckyStarActive = false;
+            luckyStarAccepted = false;
+            initTeamBoard();
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('lucky-star-badge').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
